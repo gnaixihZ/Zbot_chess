@@ -14,15 +14,6 @@ class GameState:
         self.whitetomove = True
         self.movelog = []
 
-class king:
-    pass
-
-def draw_piece():
-    pieces = ['wK','wQ','wR','wB','wN','wp','bK','bQ','bR','bB','bN','bp']
-    images = {}
-    for piece in pieces:
-        images[piece] = pygame.image.load("images/" + piece + ".png")
-
 def draw_text(screen,font_name,text,size,x,y,color):
     font = pygame.font.Font(font_name,size)
     text_surface = font.render(text,True,color)
