@@ -38,6 +38,7 @@ class move:
 
 #         else:
 #             return True
+#這邊還沒試過，反正就先寫著
     def display_move(self,screen,board,sr,sc):
         if board[sr][sc] == "--":
             return 1
