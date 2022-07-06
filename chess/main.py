@@ -31,7 +31,7 @@ def main():
         clock.tick(FPS)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                running = False
+                running = False  
             if event.type == pygame.MOUSEBUTTONDOWN:
                     selecting = pygame.mouse.get_pos()
                     mr = selecting[0]//sl
@@ -42,16 +42,17 @@ def main():
                     else:
                         select = (mr,mc)
                         clicks.append(select)
-                    if gs.board[clicks[0][1]][clicks[0][0]] == "--":
-                        select = ()
-                        clicks = []
                     if len(clicks) == 2:
+                        #if g.move.movable(gs.board,clicks[0],clicks[1]):
                         gs.board[clicks[1][1]][clicks[1][0]] = gs.board[clicks[0][1]][clicks[0][0]]
                         gs.board[clicks[0][1]][clicks[0][0]] = "--"
                         select = ()
                         clicks = []
                         for i in range(8):
-                                print(gs.board[i])
+                            print(gs.board[i])
+                        #else:
+                        #   select = ()
+                        #   clicks = []
         screen.fill((WHITE))
         g.draw_board(screen,SIDELEN,WHITE,LIGHTGRAY,font_name)
         draw_piece()
