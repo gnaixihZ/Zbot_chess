@@ -40,29 +40,33 @@ def main():
                     if not choosing and ((gs.whitetomove and gs.board[mr][mc][0] == "w") or 
                     ((not gs.whitetomove) and gs.board[mr][mc][0] == "b")):
                         select = (mr,mc)
-                        move.sellect_allowed_moves(gs.board,mr,mc)
+                        move.sellect_allowed_moves(gs.board,gs.movelog1,mr,mc)
                         choosing = True
                     elif choosing:
                         if (mr,mc) in move.allowed_moves:
-                            gs.board[mr][mc] = gs.board[select[0]][select[1]]
-                            gs.board[select[0]][select[1]] = "--"
+                            move.move_piece(gs.board,select[0],select[1],mr,mc)
                             move.record_move(gs.movelog1,select[0],select[1],mr,mc)
                             choosing = False
                             gs.whitetomove = not gs.whitetomove
                             select = ()
                             move.allowed_moves = []
+                            move.special_moves = [[],[],[]]
                             for i in range(8):
                                 print(gs.board[i])
+                            print("")
+                            print(gs.movelog1)
                             print("")
                         else:
                             if gs.board[mr][mc][0] == gs.board[select[0]][select[1]][0]:
                                 move.allowed_moves = []
+                                move.special_moves = [[],[],[]]
                                 select = (mr,mc)
-                                move.sellect_allowed_moves(gs.board,mr,mc)
+                                move.sellect_allowed_moves(gs.board,gs.movelog1,mr,mc)
                             else:
                                 choosing = False
                                 select = ()
                                 move.allowed_moves = []
+                                move.special_moves = [[],[],[]]
 
         e.draw_board(screen,SIDELEN,WHITE,LIGHTGRAY,font_name)
         draw_piece()
