@@ -20,9 +20,13 @@ class GameState:
 class move:
     def __init__(self):
         self.allowed_moves = []
+        self.special_moves = [[],[],[]] #Castling,En passant,Promotion
         self.color = {0:"w",1:"b"}
+        self.castling = [[True,True],[True,True]]
+        self.rowdic = {0:"8",1:"7",2:"6",3:"5",4:"4",5:"3",6:"2",7:"1"}
+        self.coldic = {0:"a",1:"b",2:"c",3:"d",4:"e",5:"f",6:"g",7:"h"}
 
-    def sellect_allowed_moves(self,board,sr,sc):
+    def sellect_allowed_moves(self,board,movelog,sr,sc):
         if board[sr][sc] == "--":
             return 1
         if board[sr][sc][1] == "p":
@@ -33,91 +37,77 @@ class move:
                         self.allowed_moves.append((4 - color,sc))
                     elif sr - 1 + color * 2 in range(8) and board[sr - 1 + color * 2][sc] == "--":
                         self.allowed_moves.append((sr - 1 + color * 2,sc))
-                    for j in [-1,1]:
-                        if sc + j in range(8) and (board[sr - 1 + color * 2][sc + j][0] == self.color[(color + 1)% 2]):
-                            self.allowed_moves.append((sr - 1 + color * 2,sc + j))
-                    #if sr == i * 7: #promotion
+                        if sr == 1 + color * 5:
+                            self.special_moves[2].append((sr - 1 + color * 2,sc))
+                    for i in [-1,1]:
+                        if sc + i in range(8) and (board[sr - 1 + color * 2][sc + i][0] == self.color[(color + 1) % 2]):
+                            self.allowed_moves.append((sr - 1 + color * 2,sc + i))
+                        if sc + i in range(8) and (sr - 2 + color * 4 in range(8)) and (
+                            board[sr][sc + i][0] == self.color[(color + 1)% 2]) and (movelog[len(movelog) - 1] ==
+                            str(self.coldic[sc + i] + self.rowdic[sr - 2 + color * 4] + self.coldic[sc + i] + self.rowdic[sr])
+                            ) and (board[sr - 1 + color * 2][sc + i] == "--") and (sr == 3 + color):
+                            self.special_moves[1].append((sr - 1 + color * 2,sc + i))
+                            self.allowed_moves.append((sr - 1 + color * 2,sc + i))
+                        if sr == 1 + color * 5:
+                            self.special_moves[2].append((sr - 1 + color * 2,sc + i))
 
         if board[sr][sc][1] == "R":
             for color in range(2):
                 if board[sr][sc][0] == self.color[color]:
-                    for pm in [-1,1]:
+                    for rc in [[0,1],[0,-1],[1,0],[-1,0]]:
                         for i in range(1,8):
-                            if sr + pm * i in range(8):
-                                if board[sr + pm * i][sc] == "--":
-                                    self.allowed_moves.append((sr + pm * i,sc))
-                                if board[sr + pm * i][sc][0] == self.color[color]:
+                            r = sr + rc[0] * i
+                            c = sc + rc[1] * i
+                            if r in range(8) and c in range(8):
+                                if board[r][c] == "--":
+                                    self.allowed_moves.append((r,c))
+                                if board[r][c][0] == self.color[color]:
                                     break
-                                if board[sr + pm * i][sc][0] == self.color[(color+1)%2]:
-                                    self.allowed_moves.append((sr + pm * i,sc))
-                                    break
-                        for i in range(1,8):
-                            if sc + pm * i in range(8):
-                                if board[sr][sc + pm * i] == "--":
-                                    self.allowed_moves.append((sr,sc + pm * i))
-                                if board[sr][sc + pm * i][0] == self.color[color]:
-                                    break
-                                if board[sr][sc + pm * i][0] == self.color[(color+1)%2]:
-                                    self.allowed_moves.append((sr,sc + pm * i))
+                                if board[r][c][0] == self.color[(color+1)%2]:
+                                    self.allowed_moves.append((r,c))
                                     break
 
         if board[sr][sc][1] == "B":
             for color in range(2):
                 if board[sr][sc][0] == self.color[color]:
-                    for pm in [-1,1]:
-                        for mp in [-1,1]:
-                            for i in range(1,8):
-                                if sr + pm * i in range(8) and sc + mp * i in range(8):
-                                    if board[sr + pm * i][sc + mp * i] == "--":
-                                        self.allowed_moves.append((sr + pm * i,sc + mp * i))
-                                    if board[sr + pm * i][sc + mp * i][0] == self.color[color]:
-                                        break  
-                                    if board[sr + pm * i][sc + mp * i][0] == self.color[(color+1)%2]:
-                                        self.allowed_moves.append((sr + pm * i,sc + mp * i))
-                                        break
+                    for rc in [[1,1],[-1,1],[1,-1],[-1,-1]]:
+                        for i in range(1,8):
+                            r = sr + rc[0] * i
+                            c = sc + rc[1] * i
+                            if r in range(8) and c in range(8):
+                                if board[r][c] == "--":
+                                    self.allowed_moves.append((r,c))
+                                if board[r][c][0] == self.color[color]:
+                                    break  
+                                if board[r][c][0] == self.color[(color+1)%2]:
+                                    self.allowed_moves.append((r,c))
+                                    break
         if board[sr][sc][1] == "N":
             for color in range(2):
                 if board[sr][sc][0] == self.color[color]:
-                    for m in [[1,2],[2,1]]:
-                        for pm in [-1,1]:
-                            for mp in [-1,1]:
-                                if sr + m[0] * pm in range(8) and sc + m[1] * mp in range(8):
-                                    if board[sr + m[0] * pm][sc + m[1] * mp] == "--":
-                                        self.allowed_moves.append((sr + m[0] * pm,sc + m[1] * mp))
-                                    if board[sr + m[0] * pm][sc + m[1] * mp][0] == self.color[(color+1)%2]:
-                                        self.allowed_moves.append((sr + m[0] * pm,sc + m[1] * mp))
+                    for rc in [[1,2],[2,1],[-1,2],[-2,1],[1,-2],[2,-1],[-1,-2],[-2,-1]]:
+                        r = sr + rc[0]
+                        c = sc + rc[1]
+                        if r in range(8) and c in range(8):
+                            if board[r][c] == "--":
+                                self.allowed_moves.append((r,c))
+                            if board[r][c][0] == self.color[(color+1)%2]:
+                                self.allowed_moves.append((r,c))
         if board[sr][sc][1] == "Q":
             for color in range(2):
                 if board[sr][sc][0] == self.color[color]:
-                    for pm in [-1,1]:
+                    for rc in [[0,1],[0,-1],[1,0],[-1,0],[1,1],[-1,1],[1,-1],[-1,-1]]:
                         for i in range(1,8):
-                            if sr + pm * i in range(8):
-                                if board[sr + pm * i][sc] == "--":
-                                    self.allowed_moves.append((sr + pm * i,sc))
-                                if board[sr + pm * i][sc][0] == self.color[color]:
+                            r = sr + rc[0] * i
+                            c = sc + rc[1] * i
+                            if r in range(8) and c in range(8):
+                                if board[r][c] == "--":
+                                    self.allowed_moves.append((r,c))
+                                if board[r][c][0] == self.color[color]:
                                     break
-                                if board[sr + pm * i][sc][0] == self.color[(color+1)%2]:
-                                    self.allowed_moves.append((sr + pm * i,sc))
+                                if board[r][c][0] == self.color[(color+1)%2]:
+                                    self.allowed_moves.append((r,c))
                                     break
-                        for i in range(1,8):
-                            if sc + pm * i in range(8):
-                                if board[sr][sc + pm * i] == "--":
-                                    self.allowed_moves.append((sr,sc + pm * i))
-                                if board[sr][sc + pm * i][0] == self.color[color]:
-                                    break
-                                if board[sr][sc + pm * i][0] == self.color[(color+1)%2]:
-                                    self.allowed_moves.append((sr,sc + pm * i))
-                                    break
-                        for mp in [-1,1]:
-                            for i in range(1,8):
-                                if sr + pm * i in range(8) and sc + mp * i in range(8):
-                                    if board[sr + pm * i][sc + mp * i] == "--":
-                                        self.allowed_moves.append((sr + pm * i,sc + mp * i))
-                                    if board[sr + pm * i][sc + mp * i][0] == self.color[color]:
-                                        break  
-                                    if board[sr + pm * i][sc + mp * i][0] == self.color[(color+1)%2]:
-                                        self.allowed_moves.append((sr + pm * i,sc + mp * i))
-                                        break
         if board[sr][sc][1] == "K":
             for color in range(2):
                 if board[sr][sc][0] == self.color[color]:
@@ -128,19 +118,67 @@ class move:
                                     self.allowed_moves.append((sr + r, sc + c))
                                 if board[sr + r][sc + c][0] == self.color[(color+1)%2]:
                                     self.allowed_moves.append((sr + r, sc + c))
+                    for ks in movelog:
+                        if ks[0:2] == ("e" + str(1+7*color)):
+                            self.castling[color] = [False,False]
+                        if ks[0:2] == ("h" + str(1+7*color)):
+                            self.castling[color][0] = [False]
+                        if ks[0:2] == ("a" + str(1+7*color)):
+                            self.castling[color][1] = [False]
+                    r = 7 - color * 7
+                    if (self.castling[color][0]) and (not self.isthreated(board,r,4)) and (
+                        not self.isthreated(board,r,5)) and (not self.isthreated(board,r,6)
+                        ) and (board[r][5] == board[r][6] == "--"):
+                        self.special_moves[0].append((r,6))
+                        self.allowed_moves.append((r,6))
+                    if (self.castling[color][0]) and (not self.isthreated(board,r,4)) and (
+                        not self.isthreated(board,r,3)) and (not self.isthreated(board,r,2)
+                        )and (not self.isthreated(board,r,1)) and (
+                        board[r][3] == board[r][2] == board[r][1] == "--"):
+                        self.special_moves[0].append((r,2))
+                        self.allowed_moves.append((r,2))
+
+    def isthreated(self,board,r,c):
+        return False
+
+    def check():
+        pass
+
+    def move_piece(self,board,sr,sc,er,ec):
+        if (er,ec) in self.special_moves[0]:
+            board[er][ec] = board[sr][sc]
+            board[sr][sc] = "--"
+            if ec == 6:
+                board[er][5] = board[er][7]
+                board[er][7] = "--"
+            if ec == 2:
+                board[er][3] = board[er][0]
+                board[er][0] = "--"
+        elif (er,ec) in self.special_moves[1]:
+            board[er][ec] = board[sr][sc]
+            board[sr][sc] = "--"
+            if er == 2:
+                board[3][ec] = "--"
+            if er == 5:
+                board[4][ec] = "--"
+        elif (er,ec) in self.special_moves[2]:
+            print("promotion")
+        else:
+            board[er][ec] = board[sr][sc]
+            board[sr][sc] = "--"
 
     def display_allowed_move(self,screen,board):
         for i in self.allowed_moves:
-            if board[i[0]][i[1]] == "--":
+            if i in self.special_moves[0]:
+                pygame.draw.circle(screen,[135,206,250],[32 + i[1] * 64,32 + i[0] * 64],10,10)
+            elif board[i[0]][i[1]] == "--":
                 pygame.draw.circle(screen,[192,192,192],[32 + i[1] * 64,32 + i[0] * 64],10,10)
             else:
                 pygame.draw.circle(screen,[192,192,192],[32 + i[1] * 64,32 + i[0] * 64],30,2)
 
-    def record_move(self,log,sr,sc,er,ec):
-        rowdic = {0:"8",1:"7",2:"6",3:"5",4:"4",5:"3",6:"2",7:"1"}
-        coldic = {0:"a",1:"b",2:"c",3:"d",4:"e",5:"f",6:"g",7:"h"}
-        move = rowdic[sr]+coldic[sc]+rowdic[er]+coldic[ec]
-        log.append(move)
+    def record_move(self,movelog,sr,sc,er,ec):
+        move = self.coldic[sc]+self.rowdic[sr]+self.coldic[ec]+self.rowdic[er]
+        movelog.append(move)
 
 def draw_text(screen,font_name,text,size,x,y,color):
     font = pygame.font.Font(font_name,size)
@@ -150,7 +188,6 @@ def draw_text(screen,font_name,text,size,x,y,color):
     text_rect.top = y
     screen.blit(text_surface,text_rect)
 
-#這邊原本預計是想讓字體大小和位置可以隨著版面大小變，但參數部分還要調整
 def draw_board(screen,sidelen,color1,color2,font_name):
     color = [color1,color2]
     for i in range(8):
