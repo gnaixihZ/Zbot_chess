@@ -45,17 +45,17 @@ def main():
                     elif choosing:
                         if (mr,mc) in move.allowed_moves:
                             move.move_piece(gs.board,select[0],select[1],mr,mc)
-                            while move.promotion:
-                                if gs.board[sellect[0]][sellect[1]][0] == "w":
-                                    color = 0
-                                else:
-                                    color = 1
-                                x = 0
-                                for i in ["Q","R","B","N"]:
-                                    screen.blit(IMAGE[move.color[color]+i],p.Rect(64 + x * 128,256,96,96))
-                                    x += 1
-                                if event.type == p.MOUSEBUTTONDOWN:
-                                    sellecting = p.mouse.get_pos()
+                            # while move.promotion:
+                            #     if gs.board[sellect[0]][sellect[1]][0] == "w":
+                            #         color = 0
+                            #     else:
+                            #         color = 1
+                            #     x = 0
+                            #     for i in ["Q","R","B","N"]:
+                            #         screen.blit(IMAGE[move.color[color]+i],p.Rect(64 + x * 128,256,96,96))
+                            #         x += 1
+                            #     if event.type == p.MOUSEBUTTONDOWN:
+                            #         sellecting = p.mouse.get_pos()
                                     
                             move.record_move(gs.movelog1,select[0],select[1],mr,mc)
                             choosing = False
