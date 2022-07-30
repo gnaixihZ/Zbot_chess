@@ -52,9 +52,9 @@ def promotion(board,sr,sc,er,ec):
                         board[er][ec] =  board[sr][sc][0] + i
                         board[sr][sc] = "--"
                         print(board[er][ec])
+                        move.promotion = False
+                        return False
                     x += 1
-                move.promotion = False
-                return False
 
 def main():
     running = True
