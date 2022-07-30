@@ -266,8 +266,8 @@ class move:
                 board[4][ec] = "--"
         elif (er,ec) in self.special_moves[2]:
             print("promotion")
-            board[er][ec] = board[sr][sc][0] + "Q"
-            board[sr][sc] = "--"
+            # board[er][ec] = board[sr][sc][0] + "Q"
+            # board[sr][sc] = "--"
             self.promotion = True
             
         else:
