@@ -24,10 +24,42 @@ def draw_piece():
             if gs.board[h][w] != "--":
                 screen.blit(IMAGE[gs.board[h][w]],p.Rect(sl*w,sl*h,sl,sl))
 
+PIMAGE = {}
+ppieces = ['wQ','wR','wB','wN','bQ','bR','bB','bN']
+for ppiece in ppieces:
+    PIMAGE[ppiece] = p.transform.scale(p.image.load("images/" + ppiece + ".png"),(96,96))
+
+def promotion(board,sr,sc,er,ec):
+    x = 0
+    for i in ["Q","R","B","N"]:
+        screen.blit(PIMAGE[board[sr][sc][0]+i],p.Rect(16 + x * 128,208,96,96))
+        x += 1
+    p.display.update()
+    waiting = True
+    while waiting:
+        clock.tick(FPS)
+        for event in p.event.get():
+            if event.type == p.QUIT:
+                p.quit()
+                return True
+            if event.type == p.MOUSEBUTTONDOWN:
+                sellecting = p.mouse.get_pos()
+                mx = sellecting[0]
+                my = sellecting[1]
+                x = 0
+                for i in ["Q","R","B","N"]:
+                    if my in range(208,305) and mx in range(16 + x * 128,113 + x * 128):
+                        board[er][ec] =  board[sr][sc][0] + i
+                        board[sr][sc] = "--"
+                        print(board[er][ec])
+                    x += 1
+                move.promotion = False
+                return False
+
 def main():
     running = True
-    sellect = ()
     choosing = False
+    sellect = ()
     while running:
         clock.tick(FPS)
         for event in p.event.get():
@@ -39,30 +71,21 @@ def main():
                     mc = sellecting[0]//sl
                     if not choosing and ((gs.whitetomove and gs.board[mr][mc][0] == "w") or 
                     ((not gs.whitetomove) and gs.board[mr][mc][0] == "b")):
-                        select = (mr,mc)
+                        sellect = (mr,mc)
                         move.find_allowed_moves(gs.board,gs.movelog1,mr,mc)
                         choosing = True
                     elif choosing:
                         if (mr,mc) in move.allowed_moves:
-                            move.move_piece(gs.board,select[0],select[1],mr,mc)
-                            # while move.promotion:
-                            #     if gs.board[sellect[0]][sellect[1]][0] == "w":
-                            #         color = 0
-                            #     else:
-                            #         color = 1
-                            #     x = 0
-                            #     for i in ["Q","R","B","N"]:
-                            #         screen.blit(IMAGE[move.color[color]+i],p.Rect(64 + x * 128,256,96,96))
-                            #         x += 1
-                            #     if event.type == p.MOUSEBUTTONDOWN:
-                            #         sellecting = p.mouse.get_pos()
-                                    
-                            move.record_move(gs.movelog1,select[0],select[1],mr,mc)
+                            move.move_piece(gs.board,sellect[0],sellect[1],mr,mc)
+                            if move.promotion:
+                                close = promotion(gs.board,sellect[0],sellect[1],mr,mc)
+                                if close:
+                                    break
+                            move.record_move(gs.movelog1,sellect[0],sellect[1],mr,mc)
                             choosing = False
                             gs.whitetomove = not gs.whitetomove
-                            move.threated_squares = [[],[]]
                             move.allowed_moves = []
-                            select = ()
+                            sellect = ()
                             move.special_moves = [[],[],[]]
                             for i in gs.board:
                                 print(i)
@@ -81,17 +104,15 @@ def main():
                                 else:
                                     print("Stalemate")
                         else:
-                            if gs.board[mr][mc][0] == gs.board[select[0]][select[1]][0]:
+                            if gs.board[mr][mc][0] == gs.board[sellect[0]][sellect[1]][0]:
                                 move.allowed_moves = []
-                                move.threated_squares = [[],[]]
                                 move.special_moves = [[],[],[]]
-                                select = (mr,mc)
+                                sellect = (mr,mc)
                                 move.find_allowed_moves(gs.board,gs.movelog1,mr,mc)
                             else:
                                 choosing = False
-                                select = ()
+                                sellect = ()
                                 move.allowed_moves = []
-                                move.threated_squares = [[],[]]
                                 move.special_moves = [[],[],[]]
 
         e.draw_board(screen,SIDELEN,WHITE,LIGHTGRAY,font_name)
